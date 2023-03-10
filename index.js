@@ -145,7 +145,7 @@ function converLichHoc(data) {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("SERVER ON!");
 });
 
 app.get("/getCookie", async (req, res) => {
