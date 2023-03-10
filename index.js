@@ -404,7 +404,19 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     let document = parser.parseFromString(data);
     let taiChinh = {}
     let table = document.getElementsByTagName("table");
-    taiChinh.short = tabletojson.convert(table[0].outerHTML)[0];
+    let short = tabletojson.convert(table[0].outerHTML)[0];
+    let phainop = 0;
+    let danop = 0;
+    let thuaThieu = 0;
+    short.forEach(item => {
+      phainop += parseInt( item["Số tiền phải nộp"].slice(0, item["Số tiền phải nộp"].length -3).replaceAll(",","").replaceAll(".",""));
+      danop += parseInt( item["Số tiền đã nộp"].slice(0, item["Số tiền đã nộp"].length -3).replaceAll(",","").replaceAll(".",""));
+      thuaThieu += parseInt( item["Thừa thiếu"].slice(0, item["Thừa thiếu"].length -3).replaceAll(",","").replaceAll(".",""));
+    });
+    taiChinh.phainop = phainop;
+    taiChinh.danop = danop;
+    taiChinh.thuaThieu = thuaThieu;
+    taiChinh.short = short;
     taiChinh.detail = tabletojson.convert(table[2].outerHTML)[0];
     return res.status(200).send(JSON.stringify(taiChinh));
   } catch (error) {
