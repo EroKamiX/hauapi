@@ -178,7 +178,7 @@ app.get("/login", async (req, res) => {
       return res.status(200).send(false);
     }
   } catch (error) {
-    return res.status(404);
+    return res.status(400);
   }
 });
 
@@ -212,7 +212,7 @@ app.get("/ThongTinLichHoc", async (req, res) => {
     let convert = tabletojson.convert(data);
     return res.status(200).send(JSON.stringify(converLichHoc(convert[0])));
   } catch (error) {
-    return res.status(404).send(JSON.stringify(error));
+    return res.status(400).send(JSON.stringify(error));
   }
 });
 
@@ -246,7 +246,7 @@ app.get("/ThongTinLichThi", async (req, res) => {
     let convert = tabletojson.convert(data);
     return res.status(200).send(JSON.stringify(convert[0]));
   } catch (error) {
-    return res.status(404).send(JSON.stringify(error));
+    return res.status(400).send(JSON.stringify(error));
   }
 });
 
@@ -306,7 +306,7 @@ app.get("/TraCuuDiem", async (req, res) => {
     ThongTinDiemSinhVien.bangdiem = bangdiem[0];
     return res.status(200).send(JSON.stringify(ThongTinDiemSinhVien));
   } catch (error) {
-    return res.status(404).send(JSON.stringify(error));
+    return res.status(400).send(JSON.stringify(error));
   }
 });
 
@@ -372,7 +372,7 @@ app.get("/ThongTinDiemSinhVien", async (req, res) => {
     ThongTinDiemSinhVien.bangdiem = bangdiem[0];
     return res.status(200).send(JSON.stringify(ThongTinDiemSinhVien));
   } catch (error) {
-    return res.status(404).send(JSON.stringify(error));
+    return res.status(400).send(JSON.stringify(error));
   }
 });
 
@@ -420,7 +420,7 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     taiChinh.detail = tabletojson.convert(table[2].outerHTML)[0];
     return res.status(200).send(JSON.stringify(taiChinh));
   } catch (error) {
-    return res.status(404).send(JSON.stringify(error));
+    return res.status(400).send(JSON.stringify(error));
   }
 });
 
