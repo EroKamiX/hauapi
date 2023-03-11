@@ -208,6 +208,7 @@ app.get("/ThongTinLichHoc", async (req, res) => {
     if (response.status != 200) {
       return res.status(403).send("Timeout Seesion");
     }
+    console.log(response.data);
     let data = response.data.replaceAll("\r", "").replaceAll("\n", "");
     let convert = tabletojson.convert(data);
     return res.status(200).send(JSON.stringify(converLichHoc(convert[0])));
@@ -307,6 +308,7 @@ app.get("/TraCuuDiem", async (req, res) => {
     ThongTinDiemSinhVien.bangdiem = bangdiem[0];
     return res.status(200).send(JSON.stringify(ThongTinDiemSinhVien));
   } catch (error) {
+    console.log(error);
     return res.status(400).send(error);
   }
 });
@@ -373,6 +375,7 @@ app.get("/ThongTinDiemSinhVien", async (req, res) => {
     ThongTinDiemSinhVien.bangdiem = bangdiem[0];
     return res.status(200).send(JSON.stringify(ThongTinDiemSinhVien));
   } catch (error) {
+    console.log(error);
     return res.status(400).send(error);
   }
 });
@@ -421,6 +424,7 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     taiChinh.detail = tabletojson.convert(table[2].outerHTML)[0];
     return res.status(200).send(JSON.stringify(taiChinh));
   } catch (error) {
+    console.log(error);
     return res.status(400).send(error);
   }
 });
