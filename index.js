@@ -208,8 +208,7 @@ app.get("/ThongTinLichHoc", async (req, res) => {
     if (response.status != 200) {
       return res.status(403).send("Timeout Seesion");
     }
-    console.log(response.data);
-    let data = response.data.replaceAll("\r", "").replaceAll("\n", "");
+    let data = response.data.replace(/[\r\n]/g, "");
     let convert = tabletojson.convert(data);
     return res.status(200).send(JSON.stringify(converLichHoc(convert[0])));
   } catch (error) {
@@ -244,7 +243,7 @@ app.get("/ThongTinLichThi", async (req, res) => {
     if (response.status != 200) {
       return res.status(403).send("Timeout Seesion");
     }
-    let data = response.data.replaceAll("\r", "").replaceAll("\n", "");
+    let data = response.data.replace(/[\r\n]/g, "");
     let convert = tabletojson.convert(data);
     return res.status(200).send(JSON.stringify(convert[0]));
   } catch (error) {
@@ -274,7 +273,7 @@ app.get("/TraCuuDiem", async (req, res) => {
     //   cookie
     // );
     let ThongTinDiemSinhVien = {};
-    let data = response.data.replaceAll("\r", "").replaceAll("\n", "");
+    let data = response.data.replace(/[\r\n]/g, "");
     // .replace("TBCTichLuy", "bonusPoint");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
@@ -340,8 +339,7 @@ app.get("/ThongTinDiemSinhVien", async (req, res) => {
     }
     let ThongTinDiemSinhVien = {};
     let data = response.data
-      .replaceAll("\r", "")
-      .replaceAll("\n", "")
+      .replace(/[\r\n]/g, "")
       .replace("TBCTichLuy", "bonusPoint");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
@@ -401,21 +399,34 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     if (response.status != 200) {
       return res.status(403).send("Timeout Seesion");
     }
-    let data = response.data
-      .replaceAll("\r", "")
-      .replaceAll("\n", "");
+    let data = response.data.replace(/[\r\n]/g, "");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
-    let taiChinh = {}
+    let taiChinh = {};
     let table = document.getElementsByTagName("table");
     let short = tabletojson.convert(table[0].outerHTML)[0];
     let phainop = 0;
     let danop = 0;
     let thuaThieu = 0;
-    short.forEach(item => {
-      phainop += parseInt( item["Số tiền phải nộp"].slice(0, item["Số tiền phải nộp"].length -3).replaceAll(",","").replaceAll(".",""));
-      danop += parseInt( item["Số tiền đã nộp"].slice(0, item["Số tiền đã nộp"].length -3).replaceAll(",","").replaceAll(".",""));
-      thuaThieu += parseInt( item["Thừa thiếu"].slice(0, item["Thừa thiếu"].length -3).replaceAll(",","").replaceAll(".",""));
+    short.forEach((item) => {
+      phainop += parseInt(
+        item["Số tiền phải nộp"]
+          .slice(0, item["Số tiền phải nộp"].length - 3)
+          .replaceAll(",", "")
+          .replaceAll(".", "")
+      );
+      danop += parseInt(
+        item["Số tiền đã nộp"]
+          .slice(0, item["Số tiền đã nộp"].length - 3)
+          .replaceAll(",", "")
+          .replaceAll(".", "")
+      );
+      thuaThieu += parseInt(
+        item["Thừa thiếu"]
+          .slice(0, item["Thừa thiếu"].length - 3)
+          .replaceAll(",", "")
+          .replaceAll(".", "")
+      );
     });
     taiChinh.phainop = phainop;
     taiChinh.danop = danop;
