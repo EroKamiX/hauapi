@@ -103,7 +103,7 @@ function converLichHoc(data) {
     time["Thời gian"] = data[0]["Thời gian"];
     time["Thứ"] = data[0]["Thứ"];
     time["Tiết"] = data[0]["Tiết"];
-    time["Phòng"] = data[0]["Phòng"];
+    time["Phòng"] =  (data[0]["Phòng"] .includes("Online") ) ? "Online" : data[0]["Phòng"] ;
     monhoc.time.push({
       ...time,
     });
@@ -119,7 +119,7 @@ function converLichHoc(data) {
         monhoc["Giáo viên"] = item["Giáo viên"];
         monhoc.time = [];
         let time = {};
-        time["Thời gian"] = item["Thời gian"].replace("-"," - ");
+        time["Thời gian"] = item;
         time["Thứ"] = item["Thứ"];
         time["Tiết"] = item["Tiết"];
         time["Phòng"] = (item["Phòng"].includes("Online") ) ? "Online" : item["Phòng"] ;
@@ -131,7 +131,7 @@ function converLichHoc(data) {
         time["Thời gian"] = item["Thời gian"];
         time["Thứ"] = item["Thứ"];
         time["Tiết"] = item["Tiết"];
-        time["Phòng"] = item["Phòng"];
+        time["Phòng"] = (item["Phòng"].includes("Online") ) ? "Online" : item["Phòng"];
         monhoc.time.push({
           ...time,
         });
