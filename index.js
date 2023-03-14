@@ -119,7 +119,7 @@ function converLichHoc(data) {
         monhoc["Giáo viên"] = item["Giáo viên"];
         monhoc.time = [];
         let time = {};
-        time["Thời gian"] = item;
+        time["Thời gian"] = item["Thời gian"];
         time["Thứ"] = item["Thứ"];
         time["Tiết"] = item["Tiết"];
         time["Phòng"] = (item["Phòng"].includes("Online") ) ? "Online" : item["Phòng"] ;
