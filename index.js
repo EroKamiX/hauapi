@@ -182,6 +182,21 @@ app.get("/login", async (req, res) => {
   }
 });
 
+
+app.get("/logout", async (req, res) => {
+  try {
+    if (!req.query.cookie) {
+      return res.status(403).send("Missing params");
+    }
+    let cookie = req.query.cookie;
+    let response = await get("https://tinchi.hau.edu.vn/DangNhap/Logout", cookie);
+    return res.status(200).send(true);
+
+  } catch (error) {
+    return res.status(400);
+  }
+});
+
 app.get("/ThongTinLichHoc", async (req, res) => {
   try {
     if (!req.query.HocKy) {
@@ -273,7 +288,7 @@ app.get("/TraCuuDiem", async (req, res) => {
     //   cookie
     // );
     let ThongTinDiemSinhVien = {};
-    let data = response.data.replace(/[\r\n]/g, "");
+    let data = response.data.replace(/[\r\n]/g, "").replace(/[Ký hiệu]/g,"kyhieu");
     // .replace("TBCTichLuy", "bonusPoint");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
