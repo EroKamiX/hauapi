@@ -288,7 +288,7 @@ app.get("/TraCuuDiem", async (req, res) => {
     //   cookie
     // );
     let ThongTinDiemSinhVien = {};
-    let data = response.data.replace(/[\r\n]/g, "").replace(/[Ký hiệu]/g,"kyhieu");
+    let data = response.data.replace(/[\r\n]/g, "").replace("Ký hiệu","kyhieu");
     // .replace("TBCTichLuy", "bonusPoint");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
