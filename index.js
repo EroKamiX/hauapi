@@ -46,7 +46,16 @@ async function Checklogin(username, password, cookieHau) {
 async function login(username, password, cookieHau) {
   let res = await Checklogin(username, password, cookieHau);
   if (res.request.path.includes("/SinhVien/Home")) {
-    return true;
+    let data = res.data.replace(/[\r\n]/g, "");
+    var parser = new DomParser();
+    let document = parser.parseFromString(data);
+    let info = entities.decode(
+      document.getElementsByClassName("styMenu")[8].innerHTML
+    );
+    let arr = info.split("<br/>");
+    let hoten = arr[0].trim();
+    let lop = arr[1].trim();
+    return {hoten, lop};
   }
   return false;
 }
@@ -103,7 +112,9 @@ function converLichHoc(data) {
     time["Thời gian"] = data[0]["Thời gian"];
     time["Thứ"] = data[0]["Thứ"];
     time["Tiết"] = data[0]["Tiết"];
-    time["Phòng"] =  (data[0]["Phòng"] .includes("Online") ) ? "Online" : data[0]["Phòng"] ;
+    time["Phòng"] = data[0]["Phòng"].includes("Online")
+      ? "Online"
+      : data[0]["Phòng"];
     monhoc.time.push({
       ...time,
     });
@@ -122,7 +133,9 @@ function converLichHoc(data) {
         time["Thời gian"] = item["Thời gian"];
         time["Thứ"] = item["Thứ"];
         time["Tiết"] = item["Tiết"];
-        time["Phòng"] = (item["Phòng"].includes("Online") ) ? "Online" : item["Phòng"] ;
+        time["Phòng"] = item["Phòng"].includes("Online")
+          ? "Online"
+          : item["Phòng"];
         monhoc.time.push({
           ...time,
         });
@@ -131,7 +144,9 @@ function converLichHoc(data) {
         time["Thời gian"] = item["Thời gian"];
         time["Thứ"] = item["Thứ"];
         time["Tiết"] = item["Tiết"];
-        time["Phòng"] = (item["Phòng"].includes("Online") ) ? "Online" : item["Phòng"];
+        time["Phòng"] = item["Phòng"].includes("Online")
+          ? "Online"
+          : item["Phòng"];
         monhoc.time.push({
           ...time,
         });
@@ -173,15 +188,14 @@ app.get("/login", async (req, res) => {
     let cookie = req.query.cookie;
     let checkLogin = await login(username, password, cookie);
     if (checkLogin) {
-      return res.status(200).send(true);
+      return res.status(200).send(checkLogin);
     } else {
-      return res.status(200).send(false);
+      return res.status(400).send(false);
     }
   } catch (error) {
     return res.status(400);
   }
 });
-
 
 app.get("/logout", async (req, res) => {
   try {
@@ -189,9 +203,11 @@ app.get("/logout", async (req, res) => {
       return res.status(403).send("Missing params");
     }
     let cookie = req.query.cookie;
-    let response = await get("https://tinchi.hau.edu.vn/DangNhap/Logout", cookie);
+    let response = await get(
+      "https://tinchi.hau.edu.vn/DangNhap/Logout",
+      cookie
+    );
     return res.status(200).send(true);
-
   } catch (error) {
     return res.status(400);
   }
@@ -288,7 +304,9 @@ app.get("/TraCuuDiem", async (req, res) => {
     //   cookie
     // );
     let ThongTinDiemSinhVien = {};
-    let data = response.data.replace(/[\r\n]/g, "").replace("Ký hiệu","kyhieu");
+    let data = response.data
+      .replace(/[\r\n]/g, "")
+      .replace("Ký hiệu", "kyhieu");
     // .replace("TBCTichLuy", "bonusPoint");
     var parser = new DomParser();
     let document = parser.parseFromString(data);
