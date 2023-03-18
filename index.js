@@ -444,19 +444,19 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     short.forEach((item) => {
       phainop += parseInt(
         item["Số tiền phải nộp"]
-          .slice(0, item["Số tiền phải nộp"].length - 3)
+          .slice(0, item["Số tiền phải nộp"].length - 5)
           .replaceAll(",", "")
           .replaceAll(".", "")
       );
       danop += parseInt(
         item["Số tiền đã nộp"]
-          .slice(0, item["Số tiền đã nộp"].length - 3)
+          .slice(0, item["Số tiền đã nộp"].length - 5)
           .replaceAll(",", "")
           .replaceAll(".", "")
       );
       thuaThieu += parseInt(
         item["Thừa thiếu"]
-          .slice(0, item["Thừa thiếu"].length - 3)
+          .slice(0, item["Thừa thiếu"].length - 5)
           .replaceAll(",", "")
           .replaceAll(".", "")
       );
