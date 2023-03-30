@@ -7,7 +7,11 @@ const entities = require("html-entities");
 
 var axiosIntannce = axios.create({});
 
-async function Checklogin(username, password, cookieHau) {
+app.use(express.json()) // for parsing application/json
+app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+
+
+async function Checklogin(username, password,role = 0, cookieHau) {
   let config = {
     method: "post",
     url: "https://tinchi.hau.edu.vn/DangNhap/CheckLogin",
@@ -31,10 +35,10 @@ async function Checklogin(username, password, cookieHau) {
       "sec-fetch-user": "?1",
       "upgrade-insecure-requests": "1",
       "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
     },
     maxRedirects: 1,
-    data: "Role=0&UserName=" + username + "&Password=" + password,
+    data: "Role="+role+"&UserName=" + username + "&Password=" + password,
   };
   try {
     let response = await axios(config);
@@ -43,8 +47,8 @@ async function Checklogin(username, password, cookieHau) {
     return error;
   }
 }
-async function login(username, password, cookieHau) {
-  let res = await Checklogin(username, password, cookieHau);
+async function login(username, password,role =0, cookieHau) {
+  let res = await Checklogin(username, password,role, cookieHau);
   if (res.request.path.includes("/SinhVien/Home")) {
     let data = res.data.replace(/[\r\n]/g, "");
     var parser = new DomParser();
@@ -55,7 +59,17 @@ async function login(username, password, cookieHau) {
     let arr = info.split("<br/>");
     let hoten = arr[0].trim();
     let lop = arr[1].trim();
-    return {hoten, lop};
+    return { hoten, lop };
+  }
+  if ( res.request.path.includes("/GiangVien")) {
+    let data = res.data.replace(/[\r\n]/g, "");
+    var parser = new DomParser();
+    let document = parser.parseFromString(data);
+    let info = entities.decode(
+      document.getElementsByClassName("styMenu")[6].innerHTML
+    );
+    let hoten = info.trim();
+    return {hoten}
   }
   return false;
 }
@@ -159,6 +173,65 @@ function converLichHoc(data) {
   }
 }
 
+function converLichGiang(data) {
+  try {
+    let lich_hoc = [];
+    let monhoc = {};
+    monhoc["Mã học phần"] = data[0]["Mã học phần"];
+    monhoc["Tên học phần"] = data[0]["Tên học phần"];
+    monhoc["Số tín chỉ"] = data[0]["Số tín chỉ"];
+    monhoc["Tên lớp tín chỉ"] = data[0]["Tên lớp tín chỉ"];
+    monhoc.time = [];
+    let time = {};
+    time["Thứ"] = data[0]["Thứ"];
+    time["Tiết"] = data[0]["Tiết"];
+    time["Tên phòng"] = data[0]["Tên phòng"].includes("Online")
+      ? "Online"
+      : data[0]["Tên phòng"];
+    time["Ngày học"] = data[0]["Ngày học"];
+    monhoc.time.push({
+      ...time,
+    });
+    for (let i = 1; i < data.length; i++) {
+      const item = data[i];
+      if (monhoc["Mã học phần"]!= item["Mã học phần"]) {
+        lich_hoc.push(monhoc);
+        monhoc = {};
+        monhoc["Mã học phần"] = item["Mã học phần"];
+        monhoc["Tên học phần"] = item["Tên học phần"];
+        monhoc["Số tín chỉ"] = item["Số tín chỉ"];
+        monhoc["Tên lớp tín chỉ"] = item["Tên lớp tín chỉ"];
+        monhoc.time = [];
+        let time = {};
+        time["Ngày học"] = item["Ngày học"];
+        time["Thứ"] = item["Thứ"];
+        time["Tiết"] = item["Tiết"];
+        time["Tên phòng"] = item["Tên phòng"].includes("Online")
+          ? "Online"
+          : item["Tên phòng"];
+        monhoc.time.push({
+          ...time,
+        });
+      } else {
+        let time = {};
+        time["Ngày học"] = item["Ngày học"];
+        time["Thứ"] = item["Thứ"];
+        time["Tiết"] = item["Tiết"];
+        time["Tên phòng"] = item["Tên phòng"].includes("Online")
+          ? "Online"
+          : item["Tên phòng"];
+        monhoc.time.push({
+          ...time,
+        });
+      }
+    }
+    lich_hoc.push(monhoc);
+    return lich_hoc;
+  } catch (error) {
+    return error;
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("SERVER ON!");
 });
@@ -175,13 +248,13 @@ app.get("/getCookie", async (req, res) => {
 app.get("/login", async (req, res) => {
   try {
     if (!req.query.username) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.password) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     let username = req.query.username;
     let password = req.query.password;
@@ -200,7 +273,7 @@ app.get("/login", async (req, res) => {
 app.get("/logout", async (req, res) => {
   try {
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     let cookie = req.query.cookie;
     let response = await get(
@@ -216,13 +289,13 @@ app.get("/logout", async (req, res) => {
 app.get("/ThongTinLichHoc", async (req, res) => {
   try {
     if (!req.query.HocKy) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.NamHoc) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
 
     let HocKy = req.query.HocKy;
@@ -251,13 +324,13 @@ app.get("/ThongTinLichHoc", async (req, res) => {
 app.get("/ThongTinLichThi", async (req, res) => {
   try {
     if (!req.query.HocKy) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.NamHoc) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
 
     let HocKy = req.query.HocKy;
@@ -285,7 +358,7 @@ app.get("/ThongTinLichThi", async (req, res) => {
 app.get("/TraCuuDiem", async (req, res) => {
   try {
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
 
     let HocKy = req.query.HocKy || -1;
@@ -348,7 +421,7 @@ app.get("/TraCuuDiem", async (req, res) => {
 app.get("/ThongTinDiemSinhVien", async (req, res) => {
   try {
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
 
     let HocKy = req.query.HocKy || -1;
@@ -414,7 +487,7 @@ app.get("/ThongTinDiemSinhVien", async (req, res) => {
 app.get("/TraCuuHocPhi", async (req, res) => {
   try {
     if (!req.query.cookie) {
-      return res.status(403).send("Missing params");
+      return res.status(405).send("Missing params");
     }
 
     let HocKy = req.query.HocKy || -1;
@@ -472,7 +545,72 @@ app.get("/TraCuuHocPhi", async (req, res) => {
     return res.status(400).send(error);
   }
 });
+// GV
+app.post("/login",async (req, res) => {
+  try {
+    if (!req.body) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.body.username) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.body.password) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.body.role) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.body.cookie) {
+      return res.status(405).send("Missing params");
+    }
+    let username = req.body.username;
+    let password = req.body.password;
+    let role = req.body.role;
+    let cookie = req.body.cookie;
+    let checkLogin = await login(username, password,role, cookie);
+    if (checkLogin) {
+      return res.status(200).send(checkLogin);
+    } else {
+      return res.status(400).send(false);
+    }
+  } catch (error) {
+    return res.status(400);
+  }
+});
+app.get("/LichGiangDay", async (req, res) => {
+  try {
+    if (!req.query.HocKy) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.query.NamHoc) {
+      return res.status(405).send("Missing params");
+    }
+    if (!req.query.cookie) {
+      return res.status(405).send("Missing params");
+    }
 
+    let HocKy = req.query.HocKy;
+    let NamHoc = req.query.NamHoc;
+    let cookie = req.query.cookie;
+    let response = await get(
+      "https://tinchi.hau.edu.vn/GiangVien/LichGiangDay/LoadThoiKhoaBieu?hocKy=" +
+        HocKy +
+        "&namHoc=" +
+        NamHoc +
+        "&dotHoc=1",
+      cookie
+    );
+    if (response.status != 200) {
+      return res.status(403).send("Timeout Seesion");
+    }
+    let data = response.data.replace(/[\r\n]/g, "");
+    let convert = tabletojson.convert(data);
+    return res.status(200).send(JSON.stringify(converLichGiang(convert[0])));
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send(error);
+  }
+});
 app.listen(3000, () => {
   console.log("localhost:3000");
 });
