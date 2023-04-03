@@ -259,7 +259,7 @@ app.get("/login", async (req, res) => {
     let username = req.query.username;
     let password = req.query.password;
     let cookie = req.query.cookie;
-    let checkLogin = await login(username, password, cookie);
+    let checkLogin = await login(username, password,0, cookie);
     if (checkLogin) {
       return res.status(200).send(checkLogin);
     } else {
